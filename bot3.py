@@ -39,9 +39,7 @@ def send_message(text):
 # EUROPEAN STOCK UNIVERSE
 # ======================
 
-EU_STOCKS = 
-
-            def get_eu_universe():
+def get_eu_universe():
     return list(set([
 
         # 🇩🇪 Germania (DAX proxy)
