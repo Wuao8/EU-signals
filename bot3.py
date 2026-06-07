@@ -29,7 +29,7 @@ def send_message(text):
             timeout=10
         )
 
-        print("Telegram response:", response.text)
+        
 
     except Exception as e:
         print(f"Telegram error: {e}")
@@ -77,35 +77,35 @@ def get_data(symbol, period="6mo", interval="1d"):
             period=period,
             interval=interval,
             progress=False,
-            threads=False
+            threads=False,
+            auto_adjust=False
         )
 
+        # controllo base
         if df is None or df.empty:
             return None
 
-        # 🔥 FIX CRUCIALE: flatten colonne se MultiIndex
-        if isinstance(df.columns, pd.MultiIndex):
-            df.columns = df.columns.get_level_values(0)
-
-        df = df.reset_index()
-
-        # 🔥 prende solo colonne necessarie in modo safe
-        required_cols = ["Close"]
+        # sicurezza colonne
         if "Close" not in df.columns:
             return None
 
+        # prende solo Close (pulito e stabile)
         df = df[["Close"]].copy()
 
+        # converte in modo sicuro
         df["Close"] = pd.to_numeric(df["Close"], errors="coerce")
+
+        # elimina valori rotti
         df = df.dropna()
 
+        # troppo pochi dati → scarta
         if len(df) < 30:
             return None
 
         return df
 
     except Exception as e:
-        print(f"Data error {symbol}: {e}")
+        print(f"Skip {symbol} (data error)")
         return None
 
 
