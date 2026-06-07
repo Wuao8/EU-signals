@@ -66,7 +66,9 @@ def get_data(symbol, period="6mo", interval="1d"):
             return None
 
         df = df.reset_index()
-        df["Close"] = df["Close"].astype(float)
+        df = df.dropna()
+        df["Close"] = pd.to_numeric(df["Close"], errors="coerce")
+        df = df.dropna()
 
         return df
 
@@ -108,7 +110,7 @@ def check_signal(df):
     prev = df.iloc[-2]
     last = df.iloc[-1]
 
-    price = last["Close"]
+    price = float(last["Close"])
 
     # ======================
     # PRICE FILTER (18–26 EUR)
