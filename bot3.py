@@ -8,7 +8,7 @@ import yfinance as yf
 # ======================
 
 TOKEN = os.environ.get("TOKEN")
-CHAT_ID = int(os.environ.get("CHAT_ID"))
+CHAT_ID = os.environ.get("CHAT_ID")
 BASE_URL = f"https://api.telegram.org/bot{TOKEN}"
 
 
@@ -25,17 +25,16 @@ def send_message(text):
             data={
                 "chat_id": CHAT_ID,
                 "text": text
-            }
+            },
+            timeout=10
         )
     except Exception as e:
         print(f"Telegram error: {e}")
 
 
 # ======================
-# EUROPE STOCK UNIVERSE
+# EUROPEAN STOCK UNIVERSE
 # ======================
-# Nota: qui partiamo con una base "liquida Europa"
-# poi la espandiamo step by step
 
 EU_STOCKS = [
     # Germania
@@ -45,7 +44,7 @@ EU_STOCKS = [
     "MC.PA", "OR.PA", "SAN.PA", "AIR.PA", "SU.PA",
 
     # Italia
-    "ENEL.MI", "ENI.MI", "ISP.MI", "UCG.MI", "STM.MI",
+    "ENEL.MI", "ENI.MI", "ISP.MI", "UCG.MI",
 
     # Olanda
     "ASML.AS", "UNA.AS", "INGA.AS",
@@ -56,51 +55,123 @@ EU_STOCKS = [
 
 
 # ======================
-# DATA FETCH
+# DATA
 # ======================
 
 def get_data(symbol, period="6mo", interval="1d"):
-    df = yf.download(symbol, period=period, interval=interval, progress=False)
+    try:
+        df = yf.download(symbol, period=period, interval=interval, progress=False)
 
-    if df is None or df.empty:
+        if df is None or df.empty:
+            return None
+
+        df = df.reset_index()
+        df["Close"] = df["Close"].astype(float)
+
+        return df
+
+    except Exception as e:
+        print(f"Data error {symbol}: {e}")
         return None
 
-    df = df.reset_index()
-    df["Close"] = df["Close"].astype(float)
 
-    return df
+# ======================
+# INDICATORS
+# ======================
+
+def calculate_ema(df, period=20):
+    return df["Close"].ewm(span=period, adjust=False).mean()
+
+
+def calculate_macd(df):
+    ema12 = df["Close"].ewm(span=12, adjust=False).mean()
+    ema26 = df["Close"].ewm(span=26, adjust=False).mean()
+
+    macd = ema12 - ema26
+    signal = macd.ewm(span=9, adjust=False).mean()
+
+    return macd, signal
+
+
+# ======================
+# SIGNAL LOGIC
+# ======================
+
+def check_signal(df):
+    df["ema20"] = calculate_ema(df)
+
+    macd, signal = calculate_macd(df)
+
+    df["macd"] = macd
+    df["signal"] = signal
+
+    prev = df.iloc[-2]
+    last = df.iloc[-1]
+
+    price = last["Close"]
+
+    # ======================
+    # PRICE FILTER (18–26 EUR)
+    # ======================
+    price_filter = 18 <= price <= 26
+
+    # ======================
+    # EMA CROSS
+    # ======================
+    ema_cross = (
+        prev["Close"] < prev["ema20"]
+        and last["Close"] > last["ema20"]
+    )
+
+    # ======================
+    # MACD CROSS
+    # ======================
+    macd_cross = (
+        prev["macd"] < prev["signal"]
+        and last["macd"] > last["signal"]
+    )
+
+    return price_filter and ema_cross and macd_cross
+
+
+# ======================
+# SCAN ENGINE
+# ======================
+
+def run_scan():
+    signals = []
+
+    for symbol in EU_STOCKS:
+        try:
+            df = get_data(symbol)
+
+            if df is None or len(df) < 50:
+                continue
+
+            if check_signal(df):
+                last_price = df.iloc[-1]["Close"]
+
+                signals.append(f"{symbol} @ {round(last_price, 2)}")
+
+        except Exception as e:
+            print(f"Error {symbol}: {e}")
+
+    return signals
 
 
 # ======================
 # MAIN
 # ======================
 
-def run_scan():
-    results = []
-
-    for symbol in EU_STOCKS:
-        try:
-            df = get_data(symbol)
-
-            if df is None:
-                continue
-
-            # placeholder per prossimi step
-            print(f"Checked {symbol}")
-
-        except Exception as e:
-            print(f"Error {symbol}: {e}")
-
-    return results
-
-
-def test_telegram():
-    send_message("✅ Bot3 attivo: test Telegram OK")
-
-
 if __name__ == "__main__":
-    print("Starting Bot3...")
+    print("Starting Bot3 Scan...")
 
-    test_telegram()
+    results = run_scan()
 
-    run_scan()
+    if results:
+        message = "🚨 STOCK SIGNALS (EUROPE)\n\n" + "\n".join(results)
+        send_message(message)
+
+        print("Signals found:", results)
+    else:
+        print("No signals found")
