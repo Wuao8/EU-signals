@@ -24,12 +24,14 @@ def send_message(text):
             url,
             data={
                 "chat_id": CHAT_ID,
-                "text": text
+                "text": text,
+                "parse_mode": "HTML",
+                "disable_web_page_preview": True
             },
             timeout=10
         )
 
-        
+        print("Telegram OK:", response.text)
 
     except Exception as e:
         print(f"Telegram error: {e}")
@@ -203,7 +205,7 @@ if __name__ == "__main__":
     results = run_scan()
 
     if results:
-        message = "🚨 STOCK SIGNALS (EUROPE)\n\n" + "\n".join(results)
+        message = "STOCK SIGNALS (EUROPE)\n\n" + "\n".join(str(x) for x in results)
         send_message(message)
 
         print("Signals found:", results)
