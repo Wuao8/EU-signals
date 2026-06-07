@@ -94,6 +94,13 @@ def run_scan():
     return results
 
 
+def test_telegram():
+    send_message("✅ Bot3 attivo: test Telegram OK")
+
+
 if __name__ == "__main__":
-    print("Scanning EU stocks...")
+    print("Starting Bot3...")
+
+    test_telegram()
+
     run_scan()
