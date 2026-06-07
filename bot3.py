@@ -39,22 +39,33 @@ def send_message(text):
 # EUROPEAN STOCK UNIVERSE
 # ======================
 
-EU_STOCKS = [
-    # Germania
-    "SAP.DE", "SIE.DE", "BAS.DE", "BMW.DE", "VOW3.DE",
+EU_STOCKS = 
 
-    # Francia
-    "MC.PA", "OR.PA", "SAN.PA", "AIR.PA", "SU.PA",
+            def get_eu_universe():
+    return list(set([
 
-    # Italia
-    "ENEL.MI", "ENI.MI", "ISP.MI", "UCG.MI",
+        # 🇩🇪 Germania (DAX proxy)
+        "SAP.DE", "SIE.DE", "BAS.DE", "BMW.DE", "VOW3.DE", "DB1.DE",
 
-    # Olanda
-    "ASML.AS", "UNA.AS", "INGA.AS",
+        # 🇫🇷 Francia (CAC 40 proxy)
+        "MC.PA", "OR.PA", "SAN.PA", "AIR.PA", "SU.PA", "BNP.PA",
 
-    # Spagna
-    "SAN.MC", "IBE.MC", "ITX.MC"
-]
+        # 🇮🇹 Italia (FTSE MIB)
+        "ENEL.MI", "ENI.MI", "ISP.MI", "UCG.MI", "STLAM.MI", "LDO.MI",
+
+        # 🇳🇱 Olanda
+        "ASML.AS", "UNA.AS", "INGA.AS", "AD.AS",
+
+        # 🇪🇸 Spagna (IBEX)
+        "SAN.MC", "IBE.MC", "ITX.MC", "BBVA.MC",
+
+        # 🇨🇭 Svizzera
+        "NESN.SW", "NOVN.SW", "ROG.SW", "UBSG.SW",
+
+        # 🇬🇧 UK (FTSE)
+        "HSBA.L", "BP.L", "SHEL.L", "GSK.L", "ULVR.L", "VOD.L"
+
+    ]))
 
 
 # ======================
@@ -166,7 +177,7 @@ def check_signal(df):
 def run_scan():
     signals = []
 
-    for symbol in EU_STOCKS:
+    for symbol in get_eu_universe():
         try:
             df = get_data(symbol)
 
