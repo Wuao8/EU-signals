@@ -17,24 +17,18 @@ BASE_URL = f"https://api.telegram.org/bot{TOKEN}"
 # ======================
 
 def send_message(text):
-    url = f"{BASE_URL}/sendMessage"
-
     try:
-        response = requests.post(
-            url,
+        requests.post(
+            f"{BASE_URL}/sendMessage",
             data={
                 "chat_id": CHAT_ID,
                 "text": text,
-                "parse_mode": "HTML",
                 "disable_web_page_preview": True
             },
             timeout=10
         )
-
-        print("Telegram OK:", response.text)
-
-    except Exception as e:
-        print(f"Telegram error: {e}")
+    except:
+        pass
 
 
 # ======================
@@ -83,31 +77,26 @@ def get_data(symbol, period="6mo", interval="1d"):
             auto_adjust=False
         )
 
-        # controllo base
+        # ❌ elimina casi rotti subito
         if df is None or df.empty:
             return None
 
-        # sicurezza colonne
         if "Close" not in df.columns:
             return None
 
-        # prende solo Close (pulito e stabile)
         df = df[["Close"]].copy()
 
-        # converte in modo sicuro
+        # sicurezza totale
         df["Close"] = pd.to_numeric(df["Close"], errors="coerce")
-
-        # elimina valori rotti
         df = df.dropna()
 
-        # troppo pochi dati → scarta
-        if len(df) < 30:
+        # troppo pochi dati = inutile
+        if len(df) < 40:
             return None
 
         return df
 
-    except Exception as e:
-        print(f"Skip {symbol} (data error)")
+    except Exception:
         return None
 
 
@@ -181,16 +170,17 @@ def run_scan():
         try:
             df = get_data(symbol)
 
+            # ❌ skip silenzioso ma controllato
             if df is None or len(df) < 50:
                 continue
 
             if check_signal(df):
-                last_price = df.iloc[-1]["Close"]
+                last_price = float(df.iloc[-1]["Close"])
 
                 signals.append(f"{symbol} @ {round(last_price, 2)}")
 
-        except Exception as e:
-            print(f"Error {symbol}: {e}")
+        except Exception:
+            continue
 
     return signals
 
