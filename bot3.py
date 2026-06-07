@@ -7,8 +7,8 @@ import yfinance as yf
 # CONFIG
 # ======================
 
-TOKEN = os.environ.get("TOKEN")
-CHAT_ID = os.environ.get("CHAT_ID")
+TOKEN = str(os.environ.get("TOKEN"))
+CHAT_ID = str(os.environ.get("CHAT_ID"))
 BASE_URL = f"https://api.telegram.org/bot{TOKEN}"
 
 
@@ -20,7 +20,7 @@ def send_message(text):
     url = f"{BASE_URL}/sendMessage"
 
     try:
-        requests.post(
+        response = requests.post(
             url,
             data={
                 "chat_id": CHAT_ID,
@@ -28,6 +28,9 @@ def send_message(text):
             },
             timeout=10
         )
+
+        print("Telegram response:", response.text)
+
     except Exception as e:
         print(f"Telegram error: {e}")
 
@@ -197,3 +200,6 @@ if __name__ == "__main__":
         print("Signals found:", results)
     else:
         print("No signals found")
+
+import time
+time.sleep(2)
