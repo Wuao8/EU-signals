@@ -60,15 +60,35 @@ EU_STOCKS = [
 
 def get_data(symbol, period="6mo", interval="1d"):
     try:
-        df = yf.download(symbol, period=period, interval=interval, progress=False)
+        df = yf.download(
+            symbol,
+            period=period,
+            interval=interval,
+            progress=False,
+            threads=False
+        )
 
         if df is None or df.empty:
             return None
 
+        # 🔥 FIX CRUCIALE: flatten colonne se MultiIndex
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = df.columns.get_level_values(0)
+
         df = df.reset_index()
-        df = df.dropna()
+
+        # 🔥 prende solo colonne necessarie in modo safe
+        required_cols = ["Close"]
+        if "Close" not in df.columns:
+            return None
+
+        df = df[["Close"]].copy()
+
         df["Close"] = pd.to_numeric(df["Close"], errors="coerce")
         df = df.dropna()
+
+        if len(df) < 30:
+            return None
 
         return df
 
