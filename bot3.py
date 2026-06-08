@@ -191,7 +191,7 @@ def run_scan():
 
 if __name__ == "__main__":
     print("Starting Bot3 Scan...")
-
+    send_message("TEST BOT3")
     results = run_scan()
 
     if results:
