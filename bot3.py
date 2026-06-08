@@ -39,25 +39,106 @@ def get_eu_universe():
     return list(set([
 
         # 🇩🇪 Germania (DAX proxy)
-        "SAP.DE", "SIE.DE", "BAS.DE", "BMW.DE", "VOW3.DE", "DB1.DE",
+"SAP.DE",
+"SIE.DE",
+"ALV.DE",
+"BMW.DE",
+"VOW3.DE",
+"MBG.DE",
+"BAS.DE",
+"BAYN.DE",
+"DBK.DE",
+"ADS.DE",
+"IFX.DE",
+"RWE.DE",
+"EOAN.DE",
+"MRK.DE",
+"MTX.DE"
 
-        # 🇫🇷 Francia (CAC 40 proxy)
-        "MC.PA", "OR.PA", "SAN.PA", "AIR.PA", "SU.PA", "BNP.PA",
+       # 🇫🇷 Francia (CAC 40 proxy)
+"MC.PA",
+"OR.PA",
+"TTE.PA",
+"SAN.PA",
+"AIR.PA",
+"SU.PA",
+"BNP.PA",
+"CS.PA",
+"DG.PA",
+"AI.PA",
+"KER.PA",
+"HO.PA",
+"ML.PA",
+"RI.PA",
+"PUB.PA"
 
         # 🇮🇹 Italia (FTSE MIB)
-        "ENEL.MI", "ENI.MI", "ISP.MI", "UCG.MI", "STLAM.MI", "LDO.MI",
+"ENEL.MI",
+"ENI.MI",
+"ISP.MI",
+"UCG.MI",
+"STLAM.MI",
+"LDO.MI",
+"PRY.MI",
+"SRG.MI",
+"TRN.MI",
+"CNHI.MI",
+"MB.MI",
+"ATL.MI",
+"REC.MI",
+"PST.MI",
+"BAMI.MI"
 
         # 🇳🇱 Olanda
-        "ASML.AS", "UNA.AS", "INGA.AS", "AD.AS",
+"ASML.AS",
+"AD.AS",
+"INGA.AS",
+"UNA.AS",
+"PHIA.AS",
+"HEIA.AS",
+"PRX.AS",
+"AKZA.AS",
+"NN.AS",
+"WKL.AS",
 
         # 🇪🇸 Spagna (IBEX)
-        "SAN.MC", "IBE.MC", "ITX.MC", "BBVA.MC",
+"SAN.MC",
+"BBVA.MC",
+"ITX.MC",
+"IBE.MC",
+"REP.MC",
+"AMS.MC",
+"ACS.MC",
+"FER.MC",
+"TEF.MC",
+"ENG.MC",
+"MRL.MC",
 
         # 🇨🇭 Svizzera
-        "NESN.SW", "NOVN.SW", "ROG.SW", "UBSG.SW",
+"NESN.SW",
+"NOVN.SW",
+"ROG.SW",
+"UBSG.SW",
+"CFR.SW",
+"SREN.SW",
+"ZURN.SW",
+"ABBN.SW",
+"LONN.SW",
+"GIVN.SW"
 
-        # 🇬🇧 UK (FTSE)
-        "HSBA.L", "BP.L", "SHEL.L", "GSK.L", "ULVR.L", "VOD.L"
+       # 🇬🇧 UK (FTSE)
+"HSBA.L",
+"BP.L",
+"SHEL.L",
+"GSK.L",
+"ULVR.L",
+"RIO.L",
+"GLEN.L",
+"AZN.L",
+"LSEG.L",
+"BA.L",
+"RR.L",
+"BARC.L",
 
     ]))
 
@@ -66,36 +147,17 @@ def get_eu_universe():
 # DATA
 # ======================
 
-def get_data(symbol, period="6mo", interval="1d"):
+def get_all_data(symbols, period="6mo", interval="1d"):
     try:
-        df = yf.download(
-            symbol,
+        data = yf.download(
+            tickers=" ".join(symbols),
             period=period,
             interval=interval,
-            progress=False,
-            threads=False,
-            auto_adjust=False
+            group_by="ticker",
+            threads=True,
+            progress=False
         )
-
-        # ❌ elimina casi rotti subito
-        if df is None or df.empty:
-            return None
-
-        if "Close" not in df.columns:
-            return None
-
-        df = df[["Close"]].copy()
-
-        # sicurezza totale
-        df["Close"] = pd.to_numeric(df["Close"], errors="coerce")
-        df = df.dropna()
-
-        # troppo pochi dati = inutile
-        if len(df) < 40:
-            return None
-
-        return df
-
+        return data
     except Exception:
         return None
 
@@ -165,18 +227,35 @@ def check_signal(df):
 
 def run_scan():
     signals = []
+    symbols = get_eu_universe()
 
-    for symbol in get_eu_universe():
+    data = get_all_data(symbols)
+
+    if data is None:
+        return []
+
+    for symbol in symbols:
         try:
-            df = get_data(symbol)
+            if symbol not in data.columns.levels[0]:
+                continue
 
-            # ❌ skip silenzioso ma controllato
-            if df is None or len(df) < 50:
+            df = data[symbol].copy()
+
+            if df is None or df.empty or len(df) < 50:
+                continue
+
+            if "Close" not in df.columns:
+                continue
+
+            df = df[["Close"]].copy()
+            df["Close"] = pd.to_numeric(df["Close"], errors="coerce")
+            df = df.dropna()
+
+            if len(df) < 50:
                 continue
 
             if check_signal(df):
                 last_price = float(df.iloc[-1]["Close"])
-
                 signals.append(f"{symbol} @ {round(last_price, 2)}")
 
         except Exception:
