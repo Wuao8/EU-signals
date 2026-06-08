@@ -229,37 +229,44 @@ def run_scan():
     signals = []
     symbols = get_eu_universe()
 
-    data = get_all_data(symbols)
+    chunk_size = 15  # batch piccoli = stabile
 
-    if data is None:
-        return []
+    for i in range(0, len(symbols), chunk_size):
+        chunk = symbols[i:i+chunk_size]
 
-    for symbol in symbols:
         try:
-            if symbol not in data.columns.levels[0]:
-                continue
-
-            df = data[symbol].copy()
-
-            if df is None or df.empty or len(df) < 50:
-                continue
-
-            if "Close" not in df.columns:
-                continue
-
-            df = df[["Close"]].copy()
-            df["Close"] = pd.to_numeric(df["Close"], errors="coerce")
-            df = df.dropna()
-
-            if len(df) < 50:
-                continue
-
-            if check_signal(df):
-                last_price = float(df.iloc[-1]["Close"])
-                signals.append(f"{symbol} @ {round(last_price, 2)}")
-
+            data = yf.download(
+                tickers=" ".join(chunk),
+                period="6mo",
+                interval="1d",
+                group_by="ticker",
+                threads=False,
+                progress=False
+            )
         except Exception:
             continue
+
+        if data is None:
+            continue
+
+        for symbol in chunk:
+            try:
+                if symbol not in data.columns.levels[0]:
+                    continue
+
+                df = data[symbol][["Close"]].copy()
+                df["Close"] = pd.to_numeric(df["Close"], errors="coerce")
+                df = df.dropna()
+
+                if len(df) < 50:
+                    continue
+
+                if check_signal(df):
+                    price = float(df.iloc[-1]["Close"])
+                    signals.append(f"{symbol} @ {round(price, 2)}")
+
+            except Exception:
+                continue
 
     return signals
 
