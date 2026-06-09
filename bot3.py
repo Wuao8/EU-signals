@@ -185,6 +185,7 @@ def calculate_macd(df):
 # ======================
 
 def check_signal(df):
+
     df["ema20"] = calculate_ema(df)
 
     macd, signal = calculate_macd(df)
@@ -211,14 +212,13 @@ def check_signal(df):
     )
 
     # ======================
-    # MACD CROSS
+    # MACD ALREADY BULLISH
     # ======================
-    macd_cross = (
-        prev["macd"] < prev["signal"]
-        and last["macd"] > last["signal"]
+    macd_bullish = (
+        last["macd"] > last["signal"]
     )
 
-    return price_filter and ema_cross and macd_cross
+    return price_filter and ema_cross and macd_bullish
 
 
 # ======================
