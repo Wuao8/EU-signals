@@ -237,13 +237,7 @@ def check_signal(df):
     prev = df.iloc[-2]
     last = df.iloc[-1]
 
-    price = float(last["Close"])
-
-    # ======================
-    # PRICE FILTER (18–26 EUR)
-    # ======================
-    price_filter = 18 <= price <= 26
-
+    
     # ======================
     # EMA CROSS
     # ======================
@@ -259,7 +253,7 @@ def check_signal(df):
         last["macd"] > last["signal"]
     )
 
-    return price_filter and ema_cross and macd_bullish
+    return ema_cross and macd_bullish
 
 
 # ======================
