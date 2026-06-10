@@ -53,7 +53,13 @@ def get_eu_universe():
 "RWE.DE",
 "EOAN.DE",
 "MRK.DE",
-"MTX.DE"
+"MTX.DE",
+"DTE.DE",     # Deutsche Telekom
+"HEN3.DE",    # Henkel
+"BEI.DE",     # Beiersdorf
+"QIA.DE",     # Qiagen
+"HEI.DE",     # Heidelberg Materials
+"FRE.DE"     # Fresenius SE       
 
        # 🇫🇷 Francia (CAC 40 proxy)
 "MC.PA",
@@ -70,7 +76,15 @@ def get_eu_universe():
 "HO.PA",
 "ML.PA",
 "RI.PA",
-"PUB.PA"
+"PUB.PA",
+"DSY.PA",
+"EL.PA",
+"VIE.PA",
+"CA.PA",
+"ENGI.PA",
+"ORA.PA",
+"SGO.PA"        
+        
 
         # 🇮🇹 Italia (FTSE MIB)
 "ENEL.MI",
@@ -87,7 +101,14 @@ def get_eu_universe():
 "ATL.MI",
 "REC.MI",
 "PST.MI",
-"BAMI.MI"
+"BAMI.MI",
+"MBG.MI",
+"DIA.MI",
+"TEN.MI",
+"HER.MI",
+"MONC.MI",
+"BPE.MI"        
+        
 
         # 🇳🇱 Olanda
 "ASML.AS",
@@ -100,6 +121,10 @@ def get_eu_universe():
 "AKZA.AS",
 "NN.AS",
 "WKL.AS",
+"MT.AS",
+"IMCD.AS",
+"AGN.AS",
+"RAND.AS"        
 
         # 🇪🇸 Spagna (IBEX)
 "SAN.MC",
@@ -113,7 +138,12 @@ def get_eu_universe():
 "TEF.MC",
 "ENG.MC",
 "MRL.MC",
+"MAP.MC",
+"COL.MC",
+"ROVI.MC",
+"GRF.MC"
 
+        
         # 🇨🇭 Svizzera
 "NESN.SW",
 "NOVN.SW",
@@ -124,7 +154,12 @@ def get_eu_universe():
 "ZURN.SW",
 "ABBN.SW",
 "LONN.SW",
-"GIVN.SW"
+"GIVN.SW",
+"SGSN.SW",
+"SIKA.SW",
+"ALC.SW",
+"PGHN.SW",
+        
 
        # 🇬🇧 UK (FTSE)
 "HSBA.L",
@@ -139,7 +174,13 @@ def get_eu_universe():
 "BA.L",
 "RR.L",
 "BARC.L",
-
+"VOD.L",
+"NG.L",
+"SMIN.L",
+"PRU.L",
+"LLOY.L",
+"AAL.L",
+"BT-A.L"
     ]))
 
 
