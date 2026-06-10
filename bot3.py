@@ -124,7 +124,8 @@ def get_eu_universe():
 "MT.AS",
 "IMCD.AS",
 "AGN.AS",
-"RAND.AS"        
+"RAND.AS"      
+        
 
         # 🇪🇸 Spagna (IBEX)
 "SAN.MC",
